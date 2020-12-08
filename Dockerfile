@@ -36,6 +36,8 @@ RUN cd nfs-ganesha && \
     -DUSE_GUI_ADMIN_TOOLS=OFF && \
     make && DESTDIR=/dist make install
 
+RUN mv /dist/var/run /dist/run
+
 FROM homelabs/base:buster
 RUN apt-get update && apt-get install -y \
     libgssapi-krb5-2 liburcu6 rpcbind nfs-common dbus fuse libtirpc3 libwbclient0 libsqlite3-0 \

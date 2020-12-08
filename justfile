@@ -53,8 +53,4 @@ docker-xbuild-run arch:
 
     docker buildx build --platform linux/{{arch}} --load -t gfs .
 
-    docker buildx run --rm -it \
-        --cap-add=NET_ADMIN \
-        --platform linux/{{arch}} \
-        --net=host \
-            buildpack-deps:focal
+    docker run --rm -it --cap-add=ALL --net=host --privileged gfs
