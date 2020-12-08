@@ -21,6 +21,9 @@ RUN cd gfs && ./autogen.sh && \
 RUN cp -r /dist/* / || true
 
 RUN git clone --recurse-submodules --depth 1 --branch V3.3 "https://github.com/nfs-ganesha/nfs-ganesha.git"
+COPY patches/* /build/nfs-ganesha/
+RUN cd nfs-ganesha && git apply --whitespace=fix --ignore-space-change *.patch
+
 RUN cd nfs-ganesha && \
     cmake src/ \
     -DUSE_FSAL_GLUSTER=ON \
@@ -51,3 +54,5 @@ COPY /rootfs/ /
 # rm -rf /data/nonexistent
 # gluster volume create nonexistent phil-lenovo:/data/nonexistent
 # gluster volume start nonexistent
+
+# cmake src/ -DUSE_FSAL_GLUSTER=ON -DUSE_FSAL_XFS=OFF -DUSE_FSAL_PROXY=OFF -DUSE_FSAL_VFS=OFF -DUSE_FSAL_CEPH=OFF -DUSE_FSAL_GPFS=OFF -DUSE_FSAL_LUSTRE=OFF -DUSE_FSAL_PANFS=OFF -DUSE_FSAL_NULL=OFF -DUSE_FSAL_MEM=OFF -DUSE_GUI_ADMIN_TOOLS=OFF

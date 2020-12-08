@@ -1,0 +1,53 @@
+diff --git a/src/FSAL/Stackable_FSALs/FSAL_MDCACHE/mdcache_lru.c b/src/FSAL/Stackable_FSALs/FSAL_MDCACHE/mdcache_lru.c
+index 652e71b..68dadaa 100644
+--- a/src/FSAL/Stackable_FSALs/FSAL_MDCACHE/mdcache_lru.c
++++ b/src/FSAL/Stackable_FSALs/FSAL_MDCACHE/mdcache_lru.c
+@@ -2198,7 +2198,7 @@ void mdc_lru_map_dirent(mdcache_dir_entry_t *dirent)
+        key.ck = dirent->ck;
+        node = avltree_lookup(&key.node, &exp->dirent_map.map);
+        if (node) {
+-               LogFullDebug(COMPONENT_NFS_READDIR, "Already map for %s -> %lx",
++               LogFullDebug(COMPONENT_NFS_READDIR, "Already map for %s -> %" PRIx64,
+                             dirent->name, dirent->ck);
+                /* Move to MRU */
+                dmap = avltree_container_of(node, mdcache_dmap_entry_t, node);
+@@ -2223,7 +2223,7 @@ void mdc_lru_map_dirent(mdcache_dir_entry_t *dirent)
+        dmap->ck = dirent->ck;
+        dmap->name = gsh_strdup(dirent->name);
+        now(&dmap->timestamp);
+-       LogFullDebug(COMPONENT_NFS_READDIR, "Mapping %s -> %lx %p:%d",
++       LogFullDebug(COMPONENT_NFS_READDIR, "Mapping %s -> %" PRIx64 " %p:%d",
+                     dmap->name, dmap->ck, exp, exp->dirent_map.count);
+ 
+        mdc_lru_dirmap_add(exp, dmap);
+@@ -2255,7 +2255,7 @@ fsal_cookie_t *mdc_lru_unmap_dirent(uint64_t ck)
+        key.ck = ck;
+        node = avltree_lookup(&key.node, &exp->dirent_map.map);
+        if (!node) {
+-               LogFullDebug(COMPONENT_NFS_READDIR, "No map for %lx", ck);
++               LogFullDebug(COMPONENT_NFS_READDIR, "No map for %" PRIx64, ck);
+                PTHREAD_MUTEX_unlock(&exp->dirent_map.mtx);
+                return NULL;
+        }
+@@ -2267,7 +2267,7 @@ fsal_cookie_t *mdc_lru_unmap_dirent(uint64_t ck)
+ 
+        name = dmap->name;
+ 
+-       LogFullDebug(COMPONENT_NFS_READDIR, "Unmapping %s -> %lx", dmap->name,
++       LogFullDebug(COMPONENT_NFS_READDIR, "Unmapping %s -> %" PRIx64, dmap->name,
+                     dmap->ck);
+ 
+        /* Don't free name, we're passing it back to the caller */
+diff --git a/src/Protocols/NFS/nfs4_pseudo.c b/src/Protocols/NFS/nfs4_pseudo.c
+index 25bc436..9aa6dbe 100644
+--- a/src/Protocols/NFS/nfs4_pseudo.c
++++ b/src/Protocols/NFS/nfs4_pseudo.c
+@@ -596,7 +596,7 @@ bool export_is_defunct(struct gsh_export *export, uint64_t generation)
+ 
+        if (export->config_gen >= generation) {
+                LogDebug(COMPONENT_EXPORT,
+-                        "%s can't be unmounted (conf=%lu gen=%lu)",
++                        "%s can't be unmounted (conf=%" PRIu64 " gen=%" PRIu64 ")",
+                         export->pseudopath, export->config_gen, generation);
+                return false;
+        }
