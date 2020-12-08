@@ -1,2 +1,3 @@
 #!/usr/bin/execlineb -P
-ganesha.nfsd -F -L /dev/stdout
+with-contenv
+/usr/bin/ganesha.nfsd -F -L /dev/stdout

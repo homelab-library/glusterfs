@@ -1,2 +1,3 @@
 #!/usr/bin/execlineb -P
-glusterd
+with-contenv
+/usr/local/sbin/glusterd -N

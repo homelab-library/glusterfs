@@ -1,11 +1,11 @@
-FROM buildpack-deps:focal as builder
+FROM buildpack-deps:buster as builder
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y make automake autoconf libtool flex bison \
     pkg-config libssl-dev libxml2-dev python-dev libaio-dev \
     libibverbs-dev librdmacm-dev libreadline-dev liblvm2-dev \
     libglib2.0-dev liburcu-dev libcmocka-dev libsqlite3-dev \
     libacl1-dev ca-certificates curl libgssglue-dev libssl-dev \
-    libnfs-dev doxygen lsb cmake gcc git cmake \
+    libnfs-dev doxygen cmake gcc git cmake \
     libkrb5-dev gss-ntlmssp-dev libgss-dev libfuse-dev \
     libfuse3-dev librpcsecgss-dev libnfsidmap-dev libnfs-dev
 
@@ -36,13 +36,16 @@ RUN cd nfs-ganesha && \
     -DUSE_GUI_ADMIN_TOOLS=OFF && \
     make && DESTDIR=/dist make install
 
-FROM homelabs/base:focal
-#TODO delete cache
+FROM homelabs/base:buster
 RUN apt-get update && apt-get install -y \
-    libgssapi-krb5-2 && \
+    libgssapi-krb5-2 liburcu6 rpcbind nfs-common dbus fuse libtirpc3 libwbclient0 libsqlite3-0 \
+    attr ca-certificates daemon dbus dmsetup fuse libnss3 libfuse2 libacl1 python3 libncurses6 \
+    libxml2 libaio1 && \
     rm -rf /var/lib/apt/lists/*
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 COPY --from=builder /dist/ /
 COPY /rootfs/ /
 
-ENTRYPOINT [ "/bin/bash" ]
+# rm -rf /data/nonexistent
+# gluster volume create nonexistent phil-lenovo:/data/nonexistent
+# gluster volume start nonexistent

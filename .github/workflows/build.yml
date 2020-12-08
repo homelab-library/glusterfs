@@ -29,6 +29,6 @@ jobs:
       - name: Run Crossbuild
         run: |-
           docker buildx build \
-            --platform linux/arm/v7 \
+            --platform linux/amd64,linux/arm/v7,linux/arm64 \
             -t "ghcr.io/homelab-library/glusterfs:latest" \
             --push .
