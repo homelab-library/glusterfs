@@ -51,10 +51,10 @@ docker-xbuild-run arch:
     #!/usr/bin/env bash
     set -Eeuo pipefail
 
-    docker buildx build --platform linux/{{arch}} \
-        --load -t gfs -f docker/Dockerfile .
+    docker buildx build --platform linux/{{arch}} --load -t gfs .
 
-    docker run --rm -it \
+    docker buildx run --rm -it \
         --cap-add=NET_ADMIN \
+        --platform linux/{{arch}} \
         --net=host \
-            corvus
+            buildpack-deps:focal

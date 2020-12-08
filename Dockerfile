@@ -1,4 +1,4 @@
-FROM ubuntu:focal as builder
+FROM buildpack-deps:focal as builder
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y make automake autoconf libtool flex bison \
     pkg-config libssl-dev libxml2-dev python-dev libaio-dev \
@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y make automake autoconf libtool flex bis
     libacl1-dev ca-certificates curl libgssglue-dev libssl-dev \
     libnfs-dev doxygen lsb cmake gcc git cmake \
     libkrb5-dev gss-ntlmssp-dev libgss-dev libfuse-dev \
-    libfuse3-dev
+    libfuse3-dev librpcsecgss-dev libnfsidmap-dev libnfs-dev
 
 RUN mkdir -p /build/gfs && \
     curl -sL "https://github.com/gluster/glusterfs/archive/v8.3.tar.gz" > /build/gfs/glusterfs.tar.gz && \
