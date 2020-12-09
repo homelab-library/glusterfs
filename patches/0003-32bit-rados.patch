@@ -1,0 +1,125 @@
+diff --git a/src/SAL/recovery/recovery_rados.h b/src/SAL/recovery/recovery_rados.h
+index 0846500..f3c722d 100644
+--- a/src/SAL/recovery/recovery_rados.h
++++ b/src/SAL/recovery/recovery_rados.h
+@@ -84,7 +84,7 @@ void rados_kv_create_key(nfs_client_id_t *clientid, char *key, size_t size)
+        /* Can't overrun RADOS_KEY_MAX_LEN and shouldn't return EOVERFLOW or
+         * EINVAL
+         */
+-       (void) snprintf(key, size, "%lu", (uint64_t)clientid->cid_clientid);
++       (void) snprintf(key, size, "%" PRIu64, (uint64_t)clientid->cid_clientid);
+ }
+ 
+ char *rados_kv_create_val(nfs_client_id_t *clientid, size_t *len);
+diff --git a/src/SAL/recovery/recovery_rados_cluster.c b/src/SAL/recovery/recovery_rados_cluster.c
+index 9686063..82377c1 100644
+--- a/src/SAL/recovery/recovery_rados_cluster.c
++++ b/src/SAL/recovery/recovery_rados_cluster.c
+@@ -184,7 +184,7 @@ static void rados_cluster_read_clids(nfs_grace_start_t *gsp,
+        recov_oid = gsh_refstr_alloc(len);
+ 
+        /* Can't overrun and shouldn't return EOVERFLOW or EINVAL */
+-       (void) snprintf(recov_oid->gr_val, len, "rec-%16.16lx:%s", cur, nodeid);
++       (void) snprintf(recov_oid->gr_val, len, "rec-%16.16" PRIx64 ":%s", cur, nodeid);
+        gsh_refstr_get(recov_oid);
+        rcu_set_pointer(&rados_recov_oid, recov_oid);
+ 
+@@ -203,7 +203,7 @@ static void rados_cluster_read_clids(nfs_grace_start_t *gsp,
+        old_oid = gsh_refstr_alloc(len);
+ 
+ /* Can't overrun and shouldn't return EOVERFLOW or EINVAL */
+-       (void) snprintf(old_oid->gr_val, len, "rec-%16.16lx:%s", rec, nodeid);
++       (void) snprintf(old_oid->gr_val, len, "rec-%16.16" PRIx64 ":%s", rec, nodeid);
+        rcu_set_pointer(&rados_recov_old_oid, old_oid);
+        ret = rados_kv_traverse(rados_ng_pop_clid_entry, &args,
+                                old_oid->gr_val);
+@@ -319,13 +319,13 @@ static void rados_cluster_maybe_start_grace(void)
+        gsh_refstr_get(recov_oid);
+ 
+        /* Can't overrun and shouldn't return EOVERFLOW or EINVAL */
+-       (void) snprintf(recov_oid->gr_val, len, "rec-%16.16lx:%s", cur, nodeid);
++       (void) snprintf(recov_oid->gr_val, len, "rec-%16.16" PRIx64 ":%s", cur, nodeid);
+        prev_recov_oid = rcu_xchg_pointer(&rados_recov_oid, recov_oid);
+ 
+        old_oid = gsh_refstr_alloc(len);
+ 
+        /* Can't overrun and shouldn't return EOVERFLOW or EINVAL */
+-       (void) snprintf(old_oid->gr_val, len, "rec-%16.16lx:%s", rec, nodeid);
++       (void) snprintf(old_oid->gr_val, len, "rec-%16.16" PRIx64 ":%s", rec, nodeid);
+        old_oid = rcu_xchg_pointer(&rados_recov_old_oid, old_oid);
+ 
+        synchronize_rcu();
+diff --git a/src/SAL/recovery/recovery_rados_kv.c b/src/SAL/recovery/recovery_rados_kv.c
+index e73a9fd..aff49cd 100644
+--- a/src/SAL/recovery/recovery_rados_kv.c
++++ b/src/SAL/recovery/recovery_rados_kv.c
+@@ -496,7 +496,7 @@ void rados_kv_add_clid(nfs_client_id_t *clientid)
+        ret = rados_kv_put(ckey, cval, recov_oid->gr_val);
+        gsh_refstr_put(recov_oid);
+        if (ret < 0) {
+-               LogEvent(COMPONENT_CLIENTID, "Failed to add clid %lu",
++               LogEvent(COMPONENT_CLIENTID, "Failed to add clid %" PRIu64,
+                         clientid->cid_clientid);
+                gsh_free(cval);
+        } else {
+@@ -518,7 +518,7 @@ void rados_kv_rm_clid(nfs_client_id_t *clientid)
+        ret = rados_kv_del(ckey, recov_oid->gr_val);
+        gsh_refstr_put(recov_oid);
+        if (ret < 0) {
+-               LogEvent(COMPONENT_CLIENTID, "Failed to del clid %lu",
++               LogEvent(COMPONENT_CLIENTID, "Failed to del clid %" PRIu64,
+                         clientid->cid_clientid);
+                return;
+        }
+@@ -712,7 +712,7 @@ void rados_kv_add_revoke_fh(nfs_client_id_t *delr_clid, nfs_fh4 *delr_handle)
+        ret = rados_kv_put(ckey, cval, recov_oid->gr_val);
+        if (ret < 0) {
+                LogEvent(COMPONENT_CLIENTID,
+-                        "Failed to add rdfh for clid %lu",
++                        "Failed to add rdfh for clid %" PRIu64,
+                         delr_clid->cid_clientid);
+        }
+ out:
+diff --git a/src/SAL/recovery/recovery_rados_ng.c b/src/SAL/recovery/recovery_rados_ng.c
+index d845948..f08ddd7 100644
+--- a/src/SAL/recovery/recovery_rados_ng.c
++++ b/src/SAL/recovery/recovery_rados_ng.c
+@@ -200,7 +200,7 @@ static void rados_ng_add_clid(nfs_client_id_t *clientid)
+        ret = rados_ng_put(ckey, cval, recov_oid->gr_val);
+        gsh_refstr_put(recov_oid);
+        if (ret < 0) {
+-               LogEvent(COMPONENT_CLIENTID, "Failed to add clid %lu",
++               LogEvent(COMPONENT_CLIENTID, "Failed to add clid %" PRIu64,
+                         clientid->cid_clientid);
+                gsh_free(cval);
+        } else {
+@@ -223,7 +223,7 @@ static void rados_ng_rm_clid(nfs_client_id_t *clientid)
+        ret = rados_ng_del(ckey, recov_oid->gr_val);
+        gsh_refstr_put(recov_oid);
+        if (ret < 0) {
+-               LogEvent(COMPONENT_CLIENTID, "Failed to del clid %lu",
++               LogEvent(COMPONENT_CLIENTID, "Failed to del clid %" PRIu64,
+                         clientid->cid_clientid);
+                return;
+        }
+diff --git a/src/support/rados_grace.c b/src/support/rados_grace.c
+index 76b13af..d8fd093 100644
+--- a/src/support/rados_grace.c
++++ b/src/support/rados_grace.c
+@@ -29,6 +29,7 @@
+ #include <stdlib.h>
+ #include <limits.h>
+ #include <stdbool.h>
++#include <inttypes.h>
+ 
+ /* Each cluster node needs a slot here */
+ #define MAX_ITEMS                      1024
+@@ -119,7 +120,7 @@ rados_grace_dump(rados_ioctx_t io_ctx, const char *oid, FILE *stream)
+ 
+        cur = le64toh(*(uint64_t *)buf);
+        rec = le64toh(*(uint64_t *)(buf + sizeof(uint64_t)));
+-       fprintf(stream, "cur=%lu rec=%lu\n", cur, rec);
++       fprintf(stream, "cur=%" PRIu64 " rec=%" PRIu64 "\n", cur, rec);
+        fprintf(stream,
+                "======================================================\n");
+        for (;;) {
