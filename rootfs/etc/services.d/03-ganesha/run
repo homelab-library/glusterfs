@@ -1,0 +1,3 @@
+#!/usr/bin/execlineb -P
+with-contenv
+/usr/bin/ganesha.nfsd -F -L /dev/stdout -N NIV_EVENT

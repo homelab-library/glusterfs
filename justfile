@@ -53,4 +53,4 @@ docker-xbuild-run arch:
 
     docker buildx build --platform linux/{{arch}} --load -t gfs .
 
-    docker run --rm -it --cap-add=ALL --net=host --privileged gfs
+    docker run --rm -it gfs

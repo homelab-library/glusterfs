@@ -1,0 +1,6 @@
+#!/usr/bin/execlineb -P
+with-contenv
+/usr/local/sbin/glusterd 
+    --log-level INFO 
+    --log-file /proc/1/fd/1
+    -N

@@ -24,18 +24,17 @@ RUN git clone --recurse-submodules --depth 1 --branch V3.3 "https://github.com/n
 COPY patches/* /build/nfs-ganesha/
 RUN cd nfs-ganesha && git apply --whitespace=fix --ignore-space-change *.patch
 
+RUN apt-get install -y libjemalloc-dev libcap-dev libcap2 librados-dev libwbclient-dev
+
 RUN cd nfs-ganesha && \
     cmake src/ \
     -DUSE_FSAL_GLUSTER=ON \
     -DUSE_FSAL_XFS=OFF \
-    -DUSE_FSAL_PROXY=OFF \
     -DUSE_FSAL_VFS=OFF \
     -DUSE_FSAL_CEPH=OFF \
     -DUSE_FSAL_GPFS=OFF \
     -DUSE_FSAL_LUSTRE=OFF \
     -DUSE_FSAL_PANFS=OFF \
-    -DUSE_FSAL_NULL=OFF \
-    -DUSE_FSAL_MEM=OFF \
     -DUSE_GUI_ADMIN_TOOLS=OFF && \
     make && DESTDIR=/dist make install
 
@@ -45,14 +44,9 @@ FROM homelabs/base:buster
 RUN apt-get update && apt-get install -y \
     libgssapi-krb5-2 liburcu6 rpcbind nfs-common dbus fuse libtirpc3 libwbclient0 libsqlite3-0 \
     attr ca-certificates daemon dbus dmsetup fuse libnss3 libfuse2 libacl1 python3 libncurses6 \
-    libxml2 libaio1 && \
+    libxml2 libaio1 libjemalloc2 librados2 libwbclient0 netbase && \
     rm -rf /var/lib/apt/lists/*
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 COPY --from=builder /dist/ /
 COPY /rootfs/ /
-
-# rm -rf /data/nonexistent
-# gluster volume create nonexistent phil-lenovo:/data/nonexistent
-# gluster volume start nonexistent
-
-# cmake src/ -DUSE_FSAL_GLUSTER=ON -DUSE_FSAL_XFS=OFF -DUSE_FSAL_PROXY=OFF -DUSE_FSAL_VFS=OFF -DUSE_FSAL_CEPH=OFF -DUSE_FSAL_GPFS=OFF -DUSE_FSAL_LUSTRE=OFF -DUSE_FSAL_PANFS=OFF -DUSE_FSAL_NULL=OFF -DUSE_FSAL_MEM=OFF -DUSE_GUI_ADMIN_TOOLS=OFF
+VOLUME [ "/var/lib/glusterd" ]
