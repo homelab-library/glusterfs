@@ -24,7 +24,7 @@ RUN git clone --recurse-submodules --depth 1 --branch V3.3 "https://github.com/n
 COPY patches/* /build/nfs-ganesha/
 RUN cd nfs-ganesha && git apply --whitespace=fix --ignore-space-change *.patch
 
-RUN apt-get install -y libjemalloc-dev libcap-dev libcap2 librados-dev libwbclient-dev
+RUN apt-get install -y libcap-dev libcap2 librados-dev libwbclient-dev
 
 RUN cd nfs-ganesha && \
     cmake src/ \
@@ -40,13 +40,17 @@ RUN cd nfs-ganesha && \
 
 RUN mv /dist/var/run /dist/run
 
-FROM homelabs/base:buster
+FROM ghcr.io/homelab-library/base:buster
 RUN apt-get update && apt-get install -y \
     libgssapi-krb5-2 liburcu6 rpcbind nfs-common dbus fuse libtirpc3 libwbclient0 libsqlite3-0 \
     attr ca-certificates daemon dbus dmsetup fuse libnss3 libfuse2 libacl1 python3 libncurses6 \
-    libxml2 libaio1 libjemalloc2 librados2 libwbclient0 netbase && \
+    libxml2 libaio1 librados2 libwbclient0 netbase procps && \
     rm -rf /var/lib/apt/lists/*
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib \
+    S6_SERVICES_GRACETIME=8000 \
+    S6_KILL_GRACETIME=10000
+
 COPY --from=builder /dist/ /
 COPY /rootfs/ /
 VOLUME [ "/var/lib/glusterd" ]

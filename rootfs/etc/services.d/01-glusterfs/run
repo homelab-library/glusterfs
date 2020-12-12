@@ -3,4 +3,5 @@ with-contenv
 /usr/local/sbin/glusterd 
     --log-level INFO 
     --log-file /proc/1/fd/1
+    -p /var/run/glusterd.pid
     -N
